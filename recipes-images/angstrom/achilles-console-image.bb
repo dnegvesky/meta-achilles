@@ -1,27 +1,6 @@
-require recipes-images/angstrom/console-image.bb
+require recipes-images/angstrom/achilles-extended-console-image.bb
 
 IMAGE_INSTALL += " \
-	bash \
-	ethtool \
-	gcc \
-	gdb \
-	gdbserver \
-	gnuplot \
-	i2c-tools \
-	iw \
-	kernel-dev \
-	kernel-image \
-	kernel-modules \
-	lighttpd \
-	lighttpd-module-cgi \
-	net-tools \
-	nfs-utils-client \
-	packagegroup-sdk-target \
-	python \
-	tar \
-	usbutils \
-	vim \
-	vim-vimrc \
 "
 export IMAGE_BASENAME = "achilles-console-image"
 
@@ -33,7 +12,7 @@ rootfs_update_timestamp () {
 
 EXPORT_FUNCTIONS rootfs_update_timestamp
 
-# add these back in when these recipes are developed
+# add these back in under IMAGE_INSTALL when these recipes are developed
 #	achilles-fpga-init \
 #	achilles-lighttpd-conf \
 #	achilles-linux-firmware \
