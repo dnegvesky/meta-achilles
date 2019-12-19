@@ -12,5 +12,5 @@ SRCREV_FORMAT = "achilles"
 #SRCREV_achilles = "${AUTOREV}"
 
 SRC_URI_append = "\
-	file://0001-rxc-uboot.patch \
+	file://0001-rxc-achilles-uboot.patch \
 	"
