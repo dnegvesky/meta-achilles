@@ -1,0 +1,25 @@
+From bfd71acdcb000eacfd65ba715c22049e7c4f7876 Mon Sep 17 00:00:00 2001
+From: Dan Negvesky <dnegvesky@reflexces.com>
+Date: Mon, 2 Mar 2020 16:53:55 -0500
+Subject: [PATCH 1/1] add achilles dts support to arch/arm/dts/Makefile
+
+Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
+---
+ arch/arm/dts/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 5c8c3bb79f..66b1c9f1a7 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -265,6 +265,7 @@ dtb-$(CONFIG_ARCH_SOCFPGA) +=				\
+ 	socfpga_agilex_socdk_nand.dtb                   \
+ 	socfpga_agilex_socdk_qspi.dtb			\
+ 	socfpga_arria5_socdk.dtb			\
++	socfpga_arria10_achilles.dtb			\
+ 	socfpga_arria10_socdk_nand.dtb			\
+ 	socfpga_arria10_socdk_qspi.dtb			\
+ 	socfpga_arria10_socdk_sdmmc.dtb			\
+-- 
+2.17.1
+

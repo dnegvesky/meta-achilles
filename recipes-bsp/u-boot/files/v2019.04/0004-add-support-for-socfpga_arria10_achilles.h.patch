@@ -1,0 +1,112 @@
+From e40924aae404ac7c947e17849e088d5c50eb1f2f Mon Sep 17 00:00:00 2001
+From: Dan Negvesky <dnegvesky@reflexces.com>
+Date: Mon, 2 Mar 2020 16:45:44 -0500
+Subject: [PATCH 1/1] add support for socfpga_arria10_achilles.h
+
+Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
+---
+ include/configs/socfpga_arria10_achilles.h | 92 ++++++++++++++++++++++
+ 1 file changed, 92 insertions(+)
+ create mode 100644 include/configs/socfpga_arria10_achilles.h
+
+diff --git a/include/configs/socfpga_arria10_achilles.h b/include/configs/socfpga_arria10_achilles.h
+new file mode 100644
+index 0000000000..90694d4f2a
+--- /dev/null
++++ b/include/configs/socfpga_arria10_achilles.h
+@@ -0,0 +1,92 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ *  Copyright (C) 2020 REFLEX CES <www.reflexces.com>
++ */
++
++#ifndef __CONFIG_SOCFGPA_ARRIA10_H__
++#define __CONFIG_SOCFGPA_ARRIA10_H__
++
++#include <asm/arch/base_addr_a10.h>
++
++/* Booting Linux */
++#define CONFIG_LOADADDR		0x01000000
++#define CONFIG_SYS_LOAD_ADDR	CONFIG_LOADADDR
++
++#define CONFIG_SYS_BOOTM_LEN	(32 * 1024 * 1024)
++
++/*
++ * U-Boot general configurations
++ */
++
++/* Memory configurations  */
++#define PHYS_SDRAM_1_SIZE		0xC0000000
++
++/* Ethernet on SoC (EMAC) */
++
++/*
++ * U-Boot environment configurations
++ */
++
++/*
++ * Serial / UART configurations
++ */
++#define CONFIG_SYS_NS16550_MEM32
++#define CONFIG_SYS_BAUDRATE_TABLE {4800, 9600, 19200, 38400, 57600, 115200}
++
++/*
++ * L4 OSC1 Timer 0
++ */
++/* reload value when timer count to zero */
++#define TIMER_LOAD_VAL			0xFFFFFFFF
++
++/*
++ * Flash configurations
++ */
++#define CONFIG_SYS_MAX_FLASH_BANKS     1
++
++/* SPL memory allocation configuration, this is for FAT implementation */
++#define CONFIG_SYS_SPL_MALLOC_SIZE	0x00015000
++
++#if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_NAND_BOOT)
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
++	"bootm_size=0xa000000\0" \
++	"kernel_addr_r="__stringify(CONFIG_SYS_LOAD_ADDR)"\0" \
++	"fdt_addr_r=0x02000000\0" \
++	"scriptaddr=0x02100000\0" \
++	"pxefile_addr_r=0x02200000\0" \
++	"ramdisk_addr_r=0x02300000\0" \
++	"socfpga_legacy_reset_compat=1\0" \
++	"kernelfit_addr=0x1200000\0" \
++	"fitimagesize=0x5F0000\0" \
++	"qspiroot=/dev/mtdblock1\0" \
++	"qspirootfstype=jffs2\0" \
++	"qspiload=sf probe; sf read ${scriptaddr} ${kernelfit_addr}\0" \
++	"qspiboot=setenv bootargs " CONFIG_BOOTARGS \
++			"root=${qspiroot} rw rootfstype=${qspirootfstype}; " \
++			"bootm ${scriptaddr}\0" \
++	"nandroot=/dev/mtdblock1\0" \
++	"nandrootfstype=jffs2\0" \
++	"nandload=nand read ${scriptaddr} ${kernelfit_addr}\0" \
++	"nandboot=setenv bootargs " CONFIG_BOOTARGS \
++			"root=${nandroot} rw rootfstype=${nandrootfstype}; " \
++			"bootm ${scriptaddr}\0" \
++
++#endif
++
++/* The rest of the configuration is shared */
++#include <configs/socfpga_common.h>
++
++/*
++ * L4 Watchdog
++ */
++#ifdef CONFIG_HW_WATCHDOG
++#undef CONFIG_DW_WDT_BASE
++#define CONFIG_DW_WDT_BASE		SOCFPGA_L4WD1_ADDRESS
++#endif
++
++#ifdef CONFIG_NAND_DENALI_DT
++#define CONFIG_SYS_NAND_BAD_BLOCK_POS        0x0
++#endif
++
++#endif	/* __CONFIG_SOCFGPA_ARRIA10_H__ */
+-- 
+2.17.1
+
