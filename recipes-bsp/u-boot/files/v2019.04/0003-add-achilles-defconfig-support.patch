@@ -1,20 +1,20 @@
-From c156f1fe31080fe635ea9f48c31dc0c2658b5afd Mon Sep 17 00:00:00 2001
+From b1fcc9b1574d815997ae7f38bf306c9d4a5c7f5c Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@reflexces.com>
-Date: Thu, 27 Feb 2020 15:46:12 -0500
+Date: Tue, 3 Mar 2020 16:49:37 -0500
 Subject: [PATCH 1/1] add achilles defconfig support
 
 Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
 ---
- configs/socfpga_arria10_achilles_defconfig | 49 ++++++++++++++++++++++
- 1 file changed, 49 insertions(+)
+ configs/socfpga_arria10_achilles_defconfig | 50 ++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
  create mode 100644 configs/socfpga_arria10_achilles_defconfig
 
 diff --git a/configs/socfpga_arria10_achilles_defconfig b/configs/socfpga_arria10_achilles_defconfig
 new file mode 100644
-index 0000000000..26384d98d2
+index 0000000000..fd1d3622ed
 --- /dev/null
 +++ b/configs/socfpga_arria10_achilles_defconfig
-@@ -0,0 +1,49 @@
+@@ -0,0 +1,50 @@
 +CONFIG_ARM=y
 +CONFIG_ARCH_SOCFPGA=y
 +CONFIG_SPL_DRIVERS_MISC_SUPPORT=y
@@ -64,6 +64,7 @@ index 0000000000..26384d98d2
 +CONFIG_SPL_TIMER=y
 +CONFIG_DESIGNWARE_APB_TIMER=y
 +CONFIG_CMD_FPGA_LOADMK=y
++CONFIG_SYS_PROMPT="ACHILLES_A10SOM # "
 -- 
 2.17.1
 

@@ -1,27 +1,27 @@
-From e40924aae404ac7c947e17849e088d5c50eb1f2f Mon Sep 17 00:00:00 2001
+From fa056a2109b9e167760b09b27c4d1e0258d144f0 Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@reflexces.com>
-Date: Mon, 2 Mar 2020 16:45:44 -0500
-Subject: [PATCH 1/1] add support for socfpga_arria10_achilles.h
+Date: Tue, 3 Mar 2020 16:50:39 -0500
+Subject: [PATCH 1/1] add socfpga_arria10_achilles.h support
 
 Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
 ---
- include/configs/socfpga_arria10_achilles.h | 92 ++++++++++++++++++++++
- 1 file changed, 92 insertions(+)
+ include/configs/socfpga_arria10_achilles.h | 129 +++++++++++++++++++++
+ 1 file changed, 129 insertions(+)
  create mode 100644 include/configs/socfpga_arria10_achilles.h
 
 diff --git a/include/configs/socfpga_arria10_achilles.h b/include/configs/socfpga_arria10_achilles.h
 new file mode 100644
-index 0000000000..90694d4f2a
+index 0000000000..7abcdaa532
 --- /dev/null
 +++ b/include/configs/socfpga_arria10_achilles.h
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,129 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
 + *  Copyright (C) 2020 REFLEX CES <www.reflexces.com>
 + */
 +
-+#ifndef __CONFIG_SOCFGPA_ARRIA10_H__
-+#define __CONFIG_SOCFGPA_ARRIA10_H__
++#ifndef __CONFIG_SOCFGPA_ARRIA10_ACHILLES_H__
++#define __CONFIG_SOCFGPA_ARRIA10_ACHILLES_H__
 +
 +#include <asm/arch/base_addr_a10.h>
 +
@@ -43,7 +43,8 @@ index 0000000000..90694d4f2a
 +/*
 + * U-Boot environment configurations
 + */
-+
++#define RXC_CONFIG_BOOT_FROM_MMC
++#define RXC_CONFIG_BOOT_FROM_NET
 +/*
 + * Serial / UART configurations
 + */
@@ -91,6 +92,42 @@ index 0000000000..90694d4f2a
 +
 +#endif
 +
++#if defined(RXC_CONFIG_BOOT_FROM_MMC) && defined(RXC_CONFIG_BOOT_FROM_NET)
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
++	"mmcloadpart=2\0" \
++	"mmcroot=/dev/mmcblk0p3\0" \
++	"loadaddr=" __stringify(CONFIG_SYS_LOAD_ADDR) "\0" \
++	"bootfile=Image\0" \
++	"fdtaddr=8000000\0" \
++	"mmcroot=/dev/mmcblk0p2\0" \
++	"mmcboot=setenv bootargs " CONFIG_BOOTARGS \
++		" root=${mmcroot} rw rootwait;" \
++		"booti ${loadaddr} - ${fdt_addr}\0" \
++	"mmcload=mmc rescan;" \
++		"load mmc 0:${mmcloadpart} ${loadaddr} ${bootfile};" \
++		"load mmc 0:${mmcloadpart} ${fdtaddr} ${fdtfile}\0" \
++	"ethaddr=00:07:ed:00:64:04\0" \
++	"ipaddr=192.168.1.155\0" \
++	"serverip=192.168.1.131\0" \
++	"tftppath=achilles\0" \
++	"nfspath=/srv/nfs/achilles\0" \
++	"loadfdt=tftp ${fdtaddr} ${tftppath}/${fdtfile}\0" \
++	"loadbootfile= tftp ${loadaddr} ${tftppath}/${bootfile}\0" \
++	"netboot=setenv bootargs " CONFIG_BOOTARGS \
++		"ip=dhcp root=/dev/nfs rw rootwait nfsroot=${serverip}:${nfspath},nolock,rsize=4096,wsize=4096;" \
++		"tftp ${fdtaddr} ${tftppath}/${fdtfile}; " \
++		"tftp ${loadaddr} ${tftppath}/${bootfile}; " \
++		"booti ${loadaddr} - ${fdtaddr}\0" \
++	"initramfs-dir=initramfs-achilles\0" \
++	"initramfs-boot=setenv bootargs earlycon debug ignore_loglevel " \
++		"console=ttyS0,115200 root=/dev/ram rw; " \
++		"tftp ${loadaddr} ${initramfs-dir}/${bootfile}; " \
++		"tftp ${fdtaddr} ${initramfs-dir}/${fdtfile}; " \
++		"booti ${loadaddr} - ${fdtaddr}\0" \
++
++#endif
++
 +/* The rest of the configuration is shared */
 +#include <configs/socfpga_common.h>
 +
@@ -106,7 +143,7 @@ index 0000000000..90694d4f2a
 +#define CONFIG_SYS_NAND_BAD_BLOCK_POS        0x0
 +#endif
 +
-+#endif	/* __CONFIG_SOCFGPA_ARRIA10_H__ */
++#endif	/* __CONFIG_SOCFGPA_ARRIA10_ACHILLES_H__ */
 -- 
 2.17.1
 
