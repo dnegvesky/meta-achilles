@@ -1,7 +1,7 @@
-From ff9c6fd6c6ac890ca502c77b5b9a448a097788fc Mon Sep 17 00:00:00 2001
+From 9d05b55786645bb38a73f47d9788616519bc42c7 Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@reflexces.com>
-Date: Tue, 3 Mar 2020 11:40:15 -0500
-Subject: [PATCH 1/1] add achilles u-boot devicetree support
+Date: Tue, 10 Mar 2020 16:19:10 -0400
+Subject: [PATCH 1/1] add achilles support for u-boot-socfpga v2019.04
 
 Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
 ---
@@ -9,10 +9,29 @@ Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
  arch/arm/dts/socfpga_arria10_achilles.dtsi    | 169 +++++++++
  .../arm/dts/socfpga_arria10_achilles_emmc.dts |  76 ++++
  .../dts/socfpga_arria10_achilles_handoff.dtsi | 327 ++++++++++++++++++
- 4 files changed, 573 insertions(+)
+ arch/arm/mach-socfpga/Kconfig                 |   7 +
+ board/reflexces/achilles/Kconfig              |  18 +
+ board/reflexces/achilles/MAINTAINERS          |   6 +
+ board/reflexces/achilles/Makefile             |   5 +
+ board/reflexces/achilles/fit_kernel_emmc.its  |  44 +++
+ .../achilles/fit_spl_fpga_periph_only.its     |  38 ++
+ board/reflexces/achilles/fit_uboot.its        |  33 ++
+ board/reflexces/achilles/socfpga.c            |   6 +
+ configs/socfpga_arria10_achilles_defconfig    |  50 +++
+ include/configs/socfpga_arria10_achilles.h    | 131 +++++++
+ 14 files changed, 911 insertions(+)
  create mode 100644 arch/arm/dts/socfpga_arria10_achilles.dtsi
  create mode 100644 arch/arm/dts/socfpga_arria10_achilles_emmc.dts
  create mode 100644 arch/arm/dts/socfpga_arria10_achilles_handoff.dtsi
+ create mode 100644 board/reflexces/achilles/Kconfig
+ create mode 100644 board/reflexces/achilles/MAINTAINERS
+ create mode 100644 board/reflexces/achilles/Makefile
+ create mode 100644 board/reflexces/achilles/fit_kernel_emmc.its
+ create mode 100644 board/reflexces/achilles/fit_spl_fpga_periph_only.its
+ create mode 100644 board/reflexces/achilles/fit_uboot.its
+ create mode 100644 board/reflexces/achilles/socfpga.c
+ create mode 100644 configs/socfpga_arria10_achilles_defconfig
+ create mode 100644 include/configs/socfpga_arria10_achilles.h
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
 index 5c8c3bb79f..b074ca57f2 100644
@@ -616,6 +635,430 @@ index 0000000000..5ee7729962
 +		init-val = <0>;
 +	};
 +};
+diff --git a/arch/arm/mach-socfpga/Kconfig b/arch/arm/mach-socfpga/Kconfig
+index 51562ea88a..24a312e47c 100644
+--- a/arch/arm/mach-socfpga/Kconfig
++++ b/arch/arm/mach-socfpga/Kconfig
+@@ -107,6 +107,10 @@ config TARGET_SOCFPGA_AGILEX_SOCDK
+ 	bool "Intel SOCFPGA SoCDK (Agilex)"
+ 	select TARGET_SOCFPGA_AGILEX
+ 
++config TARGET_SOCFPGA_ARRIA10_ACHILLES
++	bool "Altera SOCFPGA Achilles SOM (Arria 10)"
++	select TARGET_SOCFPGA_ARRIA10
++
+ config TARGET_SOCFPGA_ARRIA10_SOCDK
+ 	bool "Altera SOCFPGA SoCDK (Arria 10)"
+ 	select TARGET_SOCFPGA_ARRIA10
+@@ -164,6 +168,7 @@ endchoice
+ 
+ config SYS_BOARD
+ 	default "agilex-socdk" if TARGET_SOCFPGA_AGILEX_SOCDK
++	default "achilles" if TARGET_SOCFPGA_ARRIA10_ACHILLES
+ 	default "arria5-socdk" if TARGET_SOCFPGA_ARRIA5_SOCDK
+ 	default "arria10-socdk" if TARGET_SOCFPGA_ARRIA10_SOCDK
+ 	default "cyclone5-socdk" if TARGET_SOCFPGA_CYCLONE5_SOCDK
+@@ -186,6 +191,7 @@ config SYS_VENDOR
+ 	default "altera" if TARGET_SOCFPGA_STRATIX10_SOCDK
+ 	default "devboards" if TARGET_SOCFPGA_DEVBOARDS_DBM_SOC1
+ 	default "ebv" if TARGET_SOCFPGA_EBV_SOCRATES
++	default "reflexces" if TARGET_SOCFPGA_ARRIA10_ACHILLES
+ 	default "samtec" if TARGET_SOCFPGA_SAMTEC_VINING_FPGA
+ 	default "terasic" if TARGET_SOCFPGA_TERASIC_DE0_NANO
+ 	default "terasic" if TARGET_SOCFPGA_TERASIC_DE1_SOC
+@@ -197,6 +203,7 @@ config SYS_SOC
+ 
+ config SYS_CONFIG_NAME
+ 	default "socfpga_agilex_socdk" if TARGET_SOCFPGA_AGILEX_SOCDK
++	default "socfpga_arria10_achilles" if TARGET_SOCFPGA_ARRIA10_ACHILLES
+ 	default "socfpga_arria5_socdk" if TARGET_SOCFPGA_ARRIA5_SOCDK
+ 	default "socfpga_arria10_socdk" if TARGET_SOCFPGA_ARRIA10_SOCDK
+ 	default "socfpga_cyclone5_socdk" if TARGET_SOCFPGA_CYCLONE5_SOCDK
+diff --git a/board/reflexces/achilles/Kconfig b/board/reflexces/achilles/Kconfig
+new file mode 100644
+index 0000000000..84670315f9
+--- /dev/null
++++ b/board/reflexces/achilles/Kconfig
+@@ -0,0 +1,18 @@
++if TARGET_SOCFPGA_ARRIA10_ACHILLES
++
++config SYS_CPU
++	default "armv7"
++
++config SYS_BOARD
++	default "socfpga_arria10"
++
++config SYS_VENDOR
++	default "reflexces"
++
++config SYS_SOC
++	default "socfpga_arria10"
++
++config SYS_CONFIG_NAME
++	default "socfpga_arria10"
++
++endif
+diff --git a/board/reflexces/achilles/MAINTAINERS b/board/reflexces/achilles/MAINTAINERS
+new file mode 100644
+index 0000000000..d2a7c11ba9
+--- /dev/null
++++ b/board/reflexces/achilles/MAINTAINERS
+@@ -0,0 +1,6 @@
++SOCFPGA BOARD
++M:	Dan Negvesky <dnegvesky@reflexces.org>
++S:	Maintained
++F:	board/reflexces/achilles/
++F:	include/configs/socfpga_arria10_achilles.h
++F:	configs/socfpga_arria10_achilles_defconfig
+diff --git a/board/reflexces/achilles/Makefile b/board/reflexces/achilles/Makefile
+new file mode 100644
+index 0000000000..80d0004346
+--- /dev/null
++++ b/board/reflexces/achilles/Makefile
+@@ -0,0 +1,5 @@
++# SPDX-License-Identifier: GPL-2.0
++#
++# Copyright (C) 2015 Altera Corporation <www.altera.com>
++
++obj-y	:= socfpga.o
+diff --git a/board/reflexces/achilles/fit_kernel_emmc.its b/board/reflexces/achilles/fit_kernel_emmc.its
+new file mode 100644
+index 0000000000..b1dabb1c9e
+--- /dev/null
++++ b/board/reflexces/achilles/fit_kernel_emmc.its
+@@ -0,0 +1,44 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2020 REFLEX CES <www.reflexces.com>
++ *
++ */
++
++/dts-v1/;
++
++/ {
++	description = "FIT image with kernel and DTB";
++	#address-cells = <1>;
++
++	images {
++		kernel {
++			description = "Linux Kernel";
++			data = /incbin/("../../../Image");
++			type = "kernel";
++			os = "linux";
++			arch = "arm";
++			compression = "none";
++			load = <0x8000>;
++			entry = <0x8000>;
++		};
++
++		fdt {
++			description = "Linux DTB";
++			data = /incbin/("../../../socfpga_arria10_achilles_emmc.dtb");
++			type = "flat_dt";
++			os = "linux";
++			arch = "arm";
++			compression = "none";
++
++		};
++	};
++
++	configurations {
++		default = "conf";
++		conf {
++			description = "Linux boot configuration";
++			kernel = "kernel";
++			fdt = "fdt";
++		};
++	};
++};
+diff --git a/board/reflexces/achilles/fit_spl_fpga_periph_only.its b/board/reflexces/achilles/fit_spl_fpga_periph_only.its
+new file mode 100644
+index 0000000000..76359bd23a
+--- /dev/null
++++ b/board/reflexces/achilles/fit_spl_fpga_periph_only.its
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: GPL-2.0
++ /*
++ * Copyright (C) 2019 Intel Corporation <www.intel.com>
++ *
++ */
++
++/dts-v1/;
++
++/ {
++	description = "FIT image with FPGA bistream";
++	#address-cells = <1>;
++
++	images {
++		fpga-periph-1 {
++			description = "FPGA peripheral bitstream";
++			data = /incbin/("../../../achilles_ghrd.periph.rbf");
++			type = "fpga";
++			arch = "arm";
++			compression = "none";
++		};
++
++		fpga-core-1 {
++			description = "FPGA core bitstream";
++			data = /incbin/("../../../achilles_ghrd.core.rbf");
++			type = "fpga";
++			arch = "arm";
++			compression = "none";
++		};
++	};
++
++	configurations {
++		default = "config-1";
++		config-1 {
++			description = "Boot with FPGA early IO release config";
++			fpga = "fpga-periph-1";
++		};
++	};
++};
+diff --git a/board/reflexces/achilles/fit_uboot.its b/board/reflexces/achilles/fit_uboot.its
+new file mode 100644
+index 0000000000..d42382da1b
+--- /dev/null
++++ b/board/reflexces/achilles/fit_uboot.its
+@@ -0,0 +1,33 @@
++// SPDX-License-Identifier: GPL-2.0
++ /*
++ * Copyright (C) 2020 REFLEX CES <www.reflexces.com>
++ *
++ */
++
++/dts-v1/;
++
++/ {
++	description = "FIT image with boot binaries";
++	#address-cells = <1>;
++
++	images {
++		uboot {
++			description = "U-Boot (32-bit)";
++			data = /incbin/("../../../u-boot-dtb.bin");
++			type = "standalone";
++			os = "U-Boot";
++			arch = "arm";
++			compression = "none";
++			load = <0x01000040>;
++			entry = <0x01000040>;
++		};
++	};
++
++	configurations {
++		default = "conf";
++		conf {
++			description = "REFLEX CES Achilles SoM";
++			loadables = "uboot";
++		};
++	};
++};
+diff --git a/board/reflexces/achilles/socfpga.c b/board/reflexces/achilles/socfpga.c
+new file mode 100644
+index 0000000000..4c466cb944
+--- /dev/null
++++ b/board/reflexces/achilles/socfpga.c
+@@ -0,0 +1,6 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2015 Altera Corporation <www.altera.com>
++ */
++
++#include <common.h>
+diff --git a/configs/socfpga_arria10_achilles_defconfig b/configs/socfpga_arria10_achilles_defconfig
+new file mode 100644
+index 0000000000..07f7492bb3
+--- /dev/null
++++ b/configs/socfpga_arria10_achilles_defconfig
+@@ -0,0 +1,50 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SOCFPGA=y
++CONFIG_SPL_DRIVERS_MISC_SUPPORT=y
++CONFIG_TARGET_SOCFPGA_ARRIA10_ACHILLES=y
++CONFIG_IDENT_STRING="socfpga_arria10"
++CONFIG_SPL_FS_FAT=y
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_FIT=y
++CONFIG_SPL_FIT=y
++CONFIG_USE_BOOTARGS=y
++CONFIG_BOOTARGS="console=ttyS0,115200"
++CONFIG_BOOTCOMMAND="run prog_core;bridge enable;run distro_bootcmd"
++CONFIG_SYS_CONSOLE_IS_IN_ENV=y
++CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE=y
++CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
++CONFIG_DEFAULT_FDT_FILE="socfpga_arria10_achilles_emmc.dtb"
++CONFIG_VERSION_VARIABLE=y
++CONFIG_DISPLAY_BOARDINFO_LATE=y
++CONFIG_SPL_ENV_SUPPORT=y
++CONFIG_SPL_FPGA_SUPPORT=y
++CONFIG_CMD_ASKENV=y
++CONFIG_CMD_GREPENV=y
++# CONFIG_CMD_FLASH is not set
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_MTDIDS_DEFAULT="nor0=ff705000.spi.0"
++CONFIG_DEFAULT_DEVICE_TREE="socfpga_arria10_achilles_emmc"
++CONFIG_OF_SPL_REMOVE_PROPS="interrupts interrupt-parent dmas dma-names"
++CONFIG_ENV_IS_IN_MMC=y
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SPL_DM_SEQ_ALIAS=y
++CONFIG_DM_GPIO=y
++CONFIG_DWAPB_GPIO=y
++CONFIG_FS_LOADER=y
++CONFIG_DM_MMC=y
++CONFIG_MMC_DW=y
++CONFIG_MTD_DEVICE=y
++CONFIG_PHY_MICREL=y
++CONFIG_PHY_MICREL_KSZ90X1=y
++CONFIG_DM_ETH=y
++CONFIG_ETH_DESIGNWARE=y
++CONFIG_MII=y
++CONFIG_SPI=y
++CONFIG_TIMER=y
++CONFIG_SPL_TIMER=y
++CONFIG_DESIGNWARE_APB_TIMER=y
++CONFIG_CMD_FPGA_LOADMK=y
++CONFIG_SYS_PROMPT="ACHILLES_A10SOM # "
+diff --git a/include/configs/socfpga_arria10_achilles.h b/include/configs/socfpga_arria10_achilles.h
+new file mode 100644
+index 0000000000..f61ed50a2e
+--- /dev/null
++++ b/include/configs/socfpga_arria10_achilles.h
+@@ -0,0 +1,131 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ *  Copyright (C) 2020 REFLEX CES <www.reflexces.com>
++ */
++
++#ifndef __CONFIG_SOCFGPA_ARRIA10_ACHILLES_H__
++#define __CONFIG_SOCFGPA_ARRIA10_ACHILLES_H__
++
++#include <asm/arch/base_addr_a10.h>
++
++/* Booting Linux */
++#define CONFIG_LOADADDR		0x01000000
++#define CONFIG_SYS_LOAD_ADDR	CONFIG_LOADADDR
++
++#define CONFIG_SYS_BOOTM_LEN	(32 * 1024 * 1024)
++
++/*
++ * U-Boot general configurations
++ */
++
++/* Memory configurations  */
++#define PHYS_SDRAM_1_SIZE		0xC0000000
++
++/* Ethernet on SoC (EMAC) */
++
++/*
++ * U-Boot environment configurations
++ */
++#define RXC_CONFIG_BOOT_FROM_MMC
++#define RXC_CONFIG_BOOT_FROM_NET
++/*
++ * Serial / UART configurations
++ */
++#define CONFIG_SYS_NS16550_MEM32
++#define CONFIG_SYS_BAUDRATE_TABLE {4800, 9600, 19200, 38400, 57600, 115200}
++
++/*
++ * L4 OSC1 Timer 0
++ */
++/* reload value when timer count to zero */
++#define TIMER_LOAD_VAL			0xFFFFFFFF
++
++/*
++ * Flash configurations
++ */
++#define CONFIG_SYS_MAX_FLASH_BANKS     1
++
++/* SPL memory allocation configuration, this is for FAT implementation */
++#define CONFIG_SYS_SPL_MALLOC_SIZE	0x00015000
++
++#if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_NAND_BOOT)
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
++	"bootm_size=0xa000000\0" \
++	"kernel_addr_r="__stringify(CONFIG_SYS_LOAD_ADDR)"\0" \
++	"fdt_addr_r=0x02000000\0" \
++	"scriptaddr=0x02100000\0" \
++	"pxefile_addr_r=0x02200000\0" \
++	"ramdisk_addr_r=0x02300000\0" \
++	"socfpga_legacy_reset_compat=1\0" \
++	"kernelfit_addr=0x1200000\0" \
++	"fitimagesize=0x5F0000\0" \
++	"qspiroot=/dev/mtdblock1\0" \
++	"qspirootfstype=jffs2\0" \
++	"qspiload=sf probe; sf read ${scriptaddr} ${kernelfit_addr}\0" \
++	"qspiboot=setenv bootargs " CONFIG_BOOTARGS \
++			"root=${qspiroot} rw rootfstype=${qspirootfstype}; " \
++			"bootm ${scriptaddr}\0" \
++	"nandroot=/dev/mtdblock1\0" \
++	"nandrootfstype=jffs2\0" \
++	"nandload=nand read ${scriptaddr} ${kernelfit_addr}\0" \
++	"nandboot=setenv bootargs " CONFIG_BOOTARGS \
++			"root=${nandroot} rw rootfstype=${nandrootfstype}; " \
++			"bootm ${scriptaddr}\0" \
++
++#endif
++
++#if defined(RXC_CONFIG_BOOT_FROM_MMC) && defined(RXC_CONFIG_BOOT_FROM_NET)
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
++	"mmcloadpart=2\0" \
++	"mmcroot=/dev/mmcblk0p3\0" \
++	"loadaddr=" __stringify(CONFIG_SYS_LOAD_ADDR) "\0" \
++	"bootfile=zImage\0" \
++	"fdtaddr=8000000\0" \
++	"mmcroot=/dev/mmcblk0p2\0" \
++	"mmcboot=setenv bootargs " CONFIG_BOOTARGS \
++		" root=${mmcroot} rw rootwait;" \
++		"bootz ${loadaddr} - ${fdt_addr}\0" \
++	"mmcload=mmc rescan;" \
++		"load mmc 0:${mmcloadpart} ${loadaddr} ${bootfile};" \
++		"load mmc 0:${mmcloadpart} ${fdtaddr} ${fdtfile}\0" \
++	"prog_core=if load mmc 0:${mmcloadpart} ${loadaddr} fit_spl_fpga.itb;" \
++		"then fpga loadmk 0 ${loadaddr}:fpga-core-1; fi\0" \
++	"ethaddr=00:07:ed:00:64:04\0" \
++	"ipaddr=192.168.1.155\0" \
++	"serverip=192.168.1.131\0" \
++	"tftppath=achilles\0" \
++	"nfspath=/srv/nfs/achilles\0" \
++	"loadfdt=tftp ${fdtaddr} ${tftppath}/${fdtfile}\0" \
++	"loadbootfile= tftp ${loadaddr} ${tftppath}/${bootfile}\0" \
++	"netboot=setenv bootargs " CONFIG_BOOTARGS \
++		"ip=dhcp root=/dev/nfs rw rootwait nfsroot=${serverip}:${nfspath},nolock,rsize=4096,wsize=4096;" \
++		"tftp ${fdtaddr} ${tftppath}/${fdtfile}; " \
++		"tftp ${loadaddr} ${tftppath}/${bootfile}; " \
++		"bootz ${loadaddr} - ${fdtaddr}\0" \
++	"initramfs-dir=initramfs-achilles\0" \
++	"initramfs-boot=setenv bootargs earlycon debug ignore_loglevel " \
++		"console=ttyS0,115200 root=/dev/ram rw; " \
++		"tftp ${loadaddr} ${initramfs-dir}/${bootfile}; " \
++		"tftp ${fdtaddr} ${initramfs-dir}/${fdtfile}; " \
++		"bootz ${loadaddr} - ${fdtaddr}\0" \
++
++#endif
++
++/* The rest of the configuration is shared */
++#include <configs/socfpga_common.h>
++
++/*
++ * L4 Watchdog
++ */
++#ifdef CONFIG_HW_WATCHDOG
++#undef CONFIG_DW_WDT_BASE
++#define CONFIG_DW_WDT_BASE		SOCFPGA_L4WD1_ADDRESS
++#endif
++
++#ifdef CONFIG_NAND_DENALI_DT
++#define CONFIG_SYS_NAND_BAD_BLOCK_POS        0x0
++#endif
++
++#endif	/* __CONFIG_SOCFGPA_ARRIA10_ACHILLES_H__ */
 -- 
 2.17.1
 

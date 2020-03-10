@@ -8,9 +8,6 @@ IMAGE_FEATURES += "allow-empty-password empty-root-password"
 IMAGE_INSTALL += " \
 	achilles-fpga-init \
 	achilles-usb-gadget \
-	achilles-x11vnc-init \
-	achilles-xfce-default-config \
-	achilles-xfce-init \
 	bash \
 	connman \
 	devmem2 \
@@ -52,3 +49,6 @@ export IMAGE_BASENAME = "extended-console-image"
 #	achilles-lighttpd-conf \
 #	achilles-linux-firmware \
 #	achilles-webcontent \
+#	achilles-x11vnc-init \
+#	achilles-xfce-default-config \
+#	achilles-xfce-init \

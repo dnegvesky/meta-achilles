@@ -1,6 +1,9 @@
 require achilles-console-image.bb
 
 IMAGE_INSTALL += " \
+	achilles-x11vnc-init \
+	achilles-xfce-default-config \
+	achilles-xfce-init \
 	epiphany \
 	evince \
 	gedit \
