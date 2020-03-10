@@ -1,5 +1,5 @@
 [Unit]
-Description=FPGA Initialization
+Description=REFLEX CES Achilles SOM FPGA Initialization
 
 [Service]
 Type=simple

@@ -1,5 +1,5 @@
 [Unit]
-Description=USB Mass Storage Gadget
+Description=REFLEX CES Achilles SOM USB Mass Storage Gadget
 After=dev-mmcblk0p2.device
 
 [Service]
