@@ -9,7 +9,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 inherit systemd
 
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=4d92cd373abda3937c2bc47fbc49d690"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 SRCREV = "${AUTOREV}"
@@ -35,7 +35,7 @@ do_install() {
 	( cd ${D}${sysconfdir}/systemd/system/getty.target.wants && ln -s /lib/systemd/system/serial-getty@.service serial-getty@ttyGS0.service )
 
 	install -d ${D}${datadir}/${PN}
-	tar -xzvf ${WORKDIR}/git/fat_image.img.tgz -C ${D}${datadir}/${PN}
+	tar -xzvf ${WORKDIR}/git/achilles_fat_image.img.tgz -C ${D}${datadir}/${PN}
 }
 
 PACKAGES =+ "${PN}-network ${PN}-udhcpd"
