@@ -1,4 +1,5 @@
-require recipes-images/angstrom/core-image-minimal.bb
+#require recipes-images/angstrom/core-image-minimal.bb
+require recipes-core/images/core-image-minimal.bb
 
 DEPENDS += "bash perl gcc i2c-tools \
 "
