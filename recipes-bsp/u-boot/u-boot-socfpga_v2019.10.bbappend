@@ -1,6 +1,6 @@
 PR = "r1"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files/v2019.04:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files/v2019.10:"
 
 SRC_URI = "git://github.com/altera-opensource/u-boot-socfpga.git;branch=socfpga_v2019.10"
 SRCREV = "7298985146c70ca8af8d43dd963b3e8aa3900d87"
