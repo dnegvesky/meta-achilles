@@ -1,12 +1,12 @@
-From abdbd7ee7df4d9f2589ab28dc43174a53517f9fa Mon Sep 17 00:00:00 2001
+From 576167a76bf6bdd82db1f89cfba2674ecd689f80 Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@reflexces.com>
-Date: Mon, 16 Mar 2020 15:45:34 -0400
+Date: Wed, 8 Apr 2020 15:56:49 -0400
 Subject: [PATCH 1/1] add achilles support for u-boot-socfpga-v2019.10
 
 Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
 ---
  arch/arm/dts/Makefile                         |   1 +
- arch/arm/dts/socfpga_arria10_achilles.dtsi    | 169 +++++++++
+ arch/arm/dts/socfpga_arria10_achilles.dtsi    | 154 +++++++++
  .../arm/dts/socfpga_arria10_achilles_emmc.dts |  76 ++++
  .../dts/socfpga_arria10_achilles_handoff.dtsi | 327 ++++++++++++++++++
  arch/arm/mach-socfpga/Kconfig                 |   7 +
@@ -19,7 +19,7 @@ Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
  board/reflexces/achilles/socfpga.c            |   6 +
  configs/socfpga_arria10_achilles_defconfig    |  51 +++
  include/configs/socfpga_arria10_achilles.h    | 129 +++++++
- 14 files changed, 920 insertions(+)
+ 14 files changed, 905 insertions(+)
  create mode 100644 arch/arm/dts/socfpga_arria10_achilles.dtsi
  create mode 100644 arch/arm/dts/socfpga_arria10_achilles_emmc.dts
  create mode 100644 arch/arm/dts/socfpga_arria10_achilles_handoff.dtsi
@@ -47,10 +47,10 @@ index c6587dce31..2f955a17bc 100644
  	socfpga_arria10_socdk_sdmmc.dtb			\
 diff --git a/arch/arm/dts/socfpga_arria10_achilles.dtsi b/arch/arm/dts/socfpga_arria10_achilles.dtsi
 new file mode 100644
-index 0000000000..08986c334f
+index 0000000000..879137aade
 --- /dev/null
 +++ b/arch/arm/dts/socfpga_arria10_achilles.dtsi
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,154 @@
 +/*
 + * Copyright (C) 2019 REFLEX CES <www.reflexces.com>
 + *
@@ -89,37 +89,9 @@ index 0000000000..08986c334f
 +	memory@0 {
 +		name = "memory";
 +		device_type = "memory";
-+		reg = <0x0 0xC0000000>; /* 3GB */ // changed from 0x40000000 (1GB) to 0xC0000000 (3GB)
++		reg = <0x0 0xC0000000>; /* 3GB */
++		u-boot,dm-pre-reloc;
 +	};
-+
-+	soc {
-+		clkmgr@ffd04000 {
-+			clocks {
-+				osc1 {
-+					clock-frequency = <25000000>;
-+				};
-+			};
-+		};
-+	};
-+};
-+
-+&mmc {
-+	status = "okay";
-+	cap-sd-highspeed;
-+	broken-cd;
-+	bus-width = <8>;
-+};
-+
-+&eccmgr {
-+	sdmmca-ecc@ff8c2c00 {
-+		compatible = "altr,socfpga-sdmmc-ecc";
-+		reg = <0xff8c2c00 0x400>;
-+		altr,ecc-parent = <&mmc>;
-+		interrupts = <15 IRQ_TYPE_LEVEL_HIGH>,
-+					 <47 IRQ_TYPE_LEVEL_HIGH>,
-+					 <16 IRQ_TYPE_LEVEL_HIGH>,
-+					 <48 IRQ_TYPE_LEVEL_HIGH>;
-+		};
 +};
 +
 +&gmac1 {
@@ -220,6 +192,19 @@ index 0000000000..08986c334f
 +&watchdog1 {
 +	status = "okay";
 +};
++
++/* Clock available early */
++&main_periph_ref_clk {
++	u-boot,dm-pre-reloc;
++};
++
++&l4_mp_clk {
++	u-boot,dm-pre-reloc;
++};
++
++&l4_sp_clk {
++	u-boot,dm-pre-reloc;
++};
 diff --git a/arch/arm/dts/socfpga_arria10_achilles_emmc.dts b/arch/arm/dts/socfpga_arria10_achilles_emmc.dts
 new file mode 100644
 index 0000000000..9b100092dd
@@ -304,7 +289,7 @@ index 0000000000..9b100092dd
 +};
 diff --git a/arch/arm/dts/socfpga_arria10_achilles_handoff.dtsi b/arch/arm/dts/socfpga_arria10_achilles_handoff.dtsi
 new file mode 100644
-index 0000000000..5ee7729962
+index 0000000000..767097ab30
 --- /dev/null
 +++ b/arch/arm/dts/socfpga_arria10_achilles_handoff.dtsi
 @@ -0,0 +1,327 @@
@@ -322,7 +307,7 @@ index 0000000000..5ee7729962
 +/ {
 +	#address-cells = <1>;
 +	#size-cells = <1>;
-+	model = "SOCFPGA Arria10 Dev Kit";	/* Bootloader setting: uboot.model */
++	model = "REFLEX CES Achilles SOM";	/* Bootloader setting: uboot.model */
 +
 +	/* Clock sources */
 +	clocks {
