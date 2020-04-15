@@ -7,14 +7,16 @@ IMAGE_INSTALL += " \
 	epiphany \
 	evince \
 	gedit \
-	packagegroup-core-x11-xserver \
-	packagegroup-gnome-fonts \
-	packagegroup-gnome-xserver-base \
-	packagegroup-xfce-base \
+	*packagegroup-core-x11-xserver \
+	*packagegroup-gnome-fonts \
+	*packagegroup-gnome-xserver-base \
+	*packagegroup-xfce-base \
 	x11vnc \
 	xserver-nodm-init \
 	xserver-xorg-xvfb \
 	xterm \
+	angstrom-gdm-autologin-hack angstrom-gdm-xfce-hack gdm \
+	angstrom-gnome-icon-theme-enable gtk-engine-clearlooks gtk-theme-clearlooks angstrom-clearlooks-theme-enable \
 "
 
 export IMAGE_BASENAME = "achilles-xfce-image"
