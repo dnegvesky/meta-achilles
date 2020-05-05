@@ -29,7 +29,6 @@ IMAGE_INSTALL += " \
 	lighttpd \
 	lighttpd-module-cgi \
 	linuxptp \
-	lmsensors \
 	net-tools \
 	nfs-utils-client \
 	openssh \
