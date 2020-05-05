@@ -6,4 +6,4 @@
 
 part --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 4 --size 100M
 part --source rawcopy --sourceparams="file=u-boot-with-spl.sfp" --ondisk mmcblk --system-id=a2 --align 4 --fixed-size 10M
-part / --source rootfs --ondisk mmcblk --fstype=ext4 --overhead-factor --label root --align 4
+part / --source rootfs --ondisk mmcblk --fstype=ext4 --overhead-factor=1.5 --label root --align 4
