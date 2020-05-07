@@ -36,4 +36,4 @@ do_deploy () {
 
 addtask deploy after do_install
 
-FILES_${PN} = "${base_libdir}/firmware" 
+FILES_${PN} += "${base_libdir}/firmware" 
