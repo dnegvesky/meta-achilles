@@ -1,6 +1,6 @@
-From 87c9c2558224f6f4d596a61930c70897cf516286 Mon Sep 17 00:00:00 2001
+From 0e6ad49ada41b41e228f6d34ca75b0aaf402bac9 Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@reflexces.com>
-Date: Wed, 4 Dec 2019 16:27:21 -0500
+Date: Wed, 6 May 2020 16:26:49 -0400
 Subject: [PATCH 1/1] add achilles devicetree
 
 Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
@@ -11,7 +11,7 @@ Signed-off-by: Dan Negvesky <dnegvesky@reflexces.com>
 
 diff --git a/arch/arm/boot/dts/socfpga_arria10_achilles.dts b/arch/arm/boot/dts/socfpga_arria10_achilles.dts
 new file mode 100644
-index 000000000000..47418c52ac6e
+index 000000000000..1f6251cca1d7
 --- /dev/null
 +++ b/arch/arm/boot/dts/socfpga_arria10_achilles.dts
 @@ -0,0 +1,169 @@
@@ -53,7 +53,7 @@ index 000000000000..47418c52ac6e
 +	memory@0 {
 +		name = "memory";
 +		device_type = "memory";
-+		reg = <0x0 0xC0000000>; /* 3GB */ // changed from 0x40000000 (1GB) to 0xC0000000 (3GB)
++		reg = <0x0 0xC0000000>; /* 3GB */
 +	};
 +
 +	soc {
@@ -71,7 +71,7 @@ index 000000000000..47418c52ac6e
 +	status = "okay";
 +	cap-sd-highspeed;
 +	broken-cd;
-+	bus-width = <4>;
++	bus-width = <8>;
 +};
 +
 +&eccmgr {
@@ -139,10 +139,10 @@ index 000000000000..47418c52ac6e
 +	rxdv-skew-ps = <420>; /* 0ps */
 +	rxc-skew-ps = <1680>; /* 780ps */
 +	max-frame-size = <3800>;
-+//	status = "okay";
++	status = "okay";
 +};
 +
-+&gpio1 {
++&gpio2 {
 +	status = "okay";
 +};
 +
@@ -176,7 +176,7 @@ index 000000000000..47418c52ac6e
 +	status = "okay";
 +};
 +
-+&usb0 {
++&usb1 {
 +	status = "okay";
 +	disable-over-current;
 +};
