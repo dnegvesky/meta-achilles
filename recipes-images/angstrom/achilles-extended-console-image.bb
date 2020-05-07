@@ -7,6 +7,7 @@ DEPENDS += "bash perl gcc i2c-tools \
 IMAGE_FEATURES += "allow-empty-password empty-root-password"
 
 IMAGE_INSTALL += " \
+	achilles-firmware \
 	achilles-fpga-init \
 	achilles-usb-gadget \
 	bash \
